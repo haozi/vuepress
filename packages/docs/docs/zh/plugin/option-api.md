@@ -11,7 +11,7 @@ metaTitle: Option API | Plugin
 
 插件的名字。
 
-在内部，VuePress 将会使用插件的包名作为插件的名称。当你你插件是一个本地插件（即直接使用了一个纯函数）时，请确保设定了该选项，这对调试更有利。
+在内部，VuePress 将会使用插件的包名作为插件的名称。当你的插件是一个本地插件（即直接使用了一个纯函数）时，请确保设定了该选项，这对调试更有利。
 
 ```js
 // .vuepress/config.js
@@ -121,7 +121,7 @@ module.exports = (options, context) => ({
 ```js
 module.exports = (options, context) => ({
   chainWebpack (config) {
-    config.resolve.alias.set('@theme', context.themePath)
+    config.resolve.alias.set('@pwd', process.cwd())
   }
 })
 ```
@@ -131,47 +131,41 @@ module.exports = (options, context) => ({
 ```js
 module.exports = (options, context) => ({
   alias: {
-    '@theme': context.themePath
+    '@theme': context.themeAPI.themePath
   }
 })
 ```
 
-## enhanceDevServer
+## beforeDevServer
 
 - 类型: `Function`
 - 默认值: undefined
 
-拓展 devServer 下层的 [Koa](https://github.com/koajs/koa) app：
+等同于 [webpack-dev-server](https://github.com/webpack/webpack-dev-server) 中的 [before](https://webpack.js.org/configuration/dev-server/#devserver-before) 选项，你可以使用它来自定义你的 devServer，如：
 
-``` js
+```js
 module.exports = {
-  enhanceDevServer (app) {
-    // ...
+  // ...
+  beforeDevServer(app, server) {
+    app.get('/path/to/your/custom', function(req, res) {
+      res.json({ custom: 'response' })
+    })
   }
 }
 ```
 
-一个简单的创建子 public 目录的插件如下：
+## afterDevServer
+
+- 类型: `Function`
+- 默认值: undefined
+
+等同于 [webpack-dev-server](https://github.com/webpack/webpack-dev-server) 中的 [after](https://webpack.js.org/configuration/dev-server/#devserver-after)，你可以用其在所有中间件的最后去执行一些自定义的中间件：
 
 ```js
-const path = require('path')
-
-module.exports = (options, context) => {
-  const imagesAssetsPath = path.resolve(context.sourceDir, '.vuepress/images')
-
-  return {
-      // For development
-      enhanceDevServer (app) {
-        const mount = require('koa-mount')
-        const serveStatic = require('koa-static')
-        app.use(mount(path.join(context.base, 'images'), serveStatic(imagesAssetsPath)))
-      },
-
-      // For production
-      async generated () {
-        const { fs } = require('@vuepress/shared-utils')
-        await fs.copy(imagesAssetsPath, path.resolve(context.outDir, 'images'))
-      }
+module.exports = {
+  // ...
+  afterDevServer(app, server) {
+    // hacking now ...
   }
 }
 ```
@@ -247,7 +241,7 @@ module.exports = {
 }
 ```
 
-此选项还支持动态代码，允许你使用触摸编译上下文的能力来做更多的事：
+此选项还支持动态代码，允许你使用贴近编译上下文的能力来做更多的事：
 
 ```js
 module.exports = (option, context) => {
@@ -308,10 +302,10 @@ module.exports = {
       regularPath,         // 当前页面遵循文件层次结构的默认链接
       path,                // 当前页面的实际链接（在 permalink 不存在时，使用 regularPath ）
     } = $page
-   
+
     // 1. Add extra fields.
-    page.xxx = 'xxx'
-    
+    $page.xxx = 'xxx'
+
     // 2. Change frontmatter.
     frontmatter.sidebar = 'auto'
   }
@@ -327,7 +321,7 @@ module.exports = {
 ``` js
 module.exports = {
   extendPageData ($page) {
-    $page.size = ($page.content.length / 1024).toFixed(2) + 'kb'
+    $page.size = ($page._content.length / 1024).toFixed(2) + 'kb'
   }
 }
 ```
@@ -339,7 +333,7 @@ module.exports = {
 - 类型: `String`
 - 默认值: `undefined`
 
-指向 `mixin` 文件的路径，它让你你可以控制根组件的生命周期：
+指向 `mixin` 文件的路径，它让你可以控制根组件的生命周期：
 
 ``` js
 // 插件的入口
@@ -417,7 +411,7 @@ module.exports = {
 - 类型: `Array|String`
 - 默认值: `undefined`
 
-你可能想注入某些全局的 UI，并固定在页面中的某处，如  `back-to-top`, `popup`。在 VuePress 中，**一个全局 UI 就是一个 Vue 组件。**你可以直接配置该全局组件的名称，如：
+你可能想注入某些全局的 UI，并固定在页面中的某处，如  `back-to-top`, `popup`。在 VuePress 中，**一个全局 UI 就是一个 Vue 组件**。你可以直接配置该全局组件的名称，如：
 
 ``` js
 module.exports = {
@@ -445,7 +439,7 @@ VuePress 将会自动将这些组件注入到布局组件的隔壁：
 - 类型: `function`
 - 默认值: `undefined`
 
-注册一个额外的 command 来增强 vuepress 的 CLI。这个函数将会以一个 [CAC](https://github.com/cacjs/cac) 的实例作为第一个参数被调用。
+注册一个额外的 command 来增强 VuePress 的 CLI。这个函数将会以一个 [CAC](https://github.com/cacjs/cac) 的实例作为第一个参数被调用。
 
 ```js
 module.exports = {

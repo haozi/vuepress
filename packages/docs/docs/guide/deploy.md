@@ -1,6 +1,6 @@
 # Deploying
 
-The following guides are based on a few shared assumptions:
+The following guides are based on some shared assumptions:
 
 - You are placing your docs inside the `docs` directory of your project;
 - You are using the default build output location (`.vuepress/dist`);
@@ -20,7 +20,7 @@ The following guides are based on a few shared assumptions:
 
    If you are deploying to `https://<USERNAME>.github.io/`, you can omit `base` as it defaults to `"/"`.
 
-   If you are deploying to `https://<USERNAME>.github.io/<REPO>/`, (i.e. your repository is at `https://github.com/<USERNAME>/<REPO>`), set `base` to `"/<REPO>/"`.
+   If you are deploying to `https://<USERNAME>.github.io/<REPO>/`, (that is your repository is at `https://github.com/<USERNAME>/<REPO>`), set `base` to `"/<REPO>/"`.
 
 2. Inside your project, create `deploy.sh` with the following content (with highlighted lines uncommented appropriately) and run it to deploy:
 
@@ -56,13 +56,45 @@ cd -
 You can also run the above script in your CI setup to enable automatic deployment on each push.
 :::
 
-## GitLab Pages and GitLab CI
+### GitHub Pages and Travis CI
+
+1. Set correct `base` in `docs/.vuepress/config.js`.
+
+   If you are deploying to `https://<USERNAME or GROUP>.github.io/`, you can omit `base` as it defaults to `"/"`.
+
+   If you are deploying to `https://<USERNAME or GROUP>.github.io/<REPO>/`, (that is your repository is at `https://github.com/<USERNAME>/<REPO>`), set `base` to `"/<REPO>/"`.
+
+2. Create a file named `.travis.yml` in the root of your project.
+
+3. Run `yarn` or `npm install` locally and commit the generated lockfile (i.e. `yarn.lock` or `package-lock.json`).
+
+4. Use GitHub Pages deploy provider template and follow the [travis documentation](https://docs.travis-ci.com/user/deployment/pages/).
+
+``` yaml
+language: node_js
+node_js:
+  - lts/*
+install:
+  - yarn install # npm ci
+script:
+  - yarn docs:build # npm run docs:build
+deploy:
+  provider: pages
+  skip_cleanup: true
+  local_dir: docs/.vuepress/dist
+  github_token: $GITHUB_TOKEN # A token generated on GitHub allowing Travis to push code on you repository. Set in the Travis settings page of your repository, as a secure variable
+  keep_history: true
+  on:
+    branch: master
+```
+
+### GitLab Pages and GitLab CI
 
 1. Set correct `base` in `docs/.vuepress/config.js`.
 
    If you are deploying to `https://<USERNAME or GROUP>.gitlab.io/`, you can omit `base` as it defaults to `"/"`.
 
-   If you are deploying to `https://<USERNAME or GROUP>.gitlab.io/<REPO>/`, (i.e. your repository is at `https://gitlab.com/<USERNAME>/<REPO>`), set `base` to `"/<REPO>/"`.
+   If you are deploying to `https://<USERNAME or GROUP>.gitlab.io/<REPO>/`, (that is your repository is at `https://gitlab.com/<USERNAME>/<REPO>`), set `base` to `"/<REPO>/"`.
 
 2. Set `dest` in `.vuepress/config.js` to `public`.
 
@@ -77,8 +109,8 @@ pages:
     - node_modules/
 
   script:
-  - npm install
-  - npm run docs:build
+  - yarn install # npm install
+  - yarn docs:build # npm run docs:build
   artifacts:
     paths:
     - public
@@ -89,10 +121,10 @@ pages:
 
 ## Netlify
 
-1. On Netlify, setup up a new project from GitHub with the following settings:
+1. On [Netlify](https://netlify.com), setup up a new project from GitHub with the following settings:
 
-  - **Build Command:** `npm run docs:build` or `yarn docs:build`
-  - **Publish directory:** `docs/.vuepress/dist`
+- **Build Command:** `yarn docs:build` or `npm run docs:build`
+- **Publish directory:** `docs/.vuepress/dist`
 
 2. Hit the deploy button!
 
@@ -125,7 +157,7 @@ pages:
 
 ## Surge
 
-1. First install [surge](https://www.npmjs.com/package/surge), if you haven't already.
+1. First install [surge](https://www.npmjs.com/package/surge), if you haven’t already.
 
 2. Run `yarn docs:build` or `npm run docs:build`.
 
@@ -140,21 +172,21 @@ You can also deploy to a [custom domain](http://surge.sh/help/adding-a-custom-do
 2. Create a Heroku account [here](https://signup.heroku.com).
 
 3. Run `heroku login` and fill in your Heroku credentials:
-  
- ``` bash
- heroku login
- ```
+
+   ``` bash
+   heroku login
+   ```
 
 4. Create a file called `static.json` in the root of your project with the content below:
 
- `static.json`:
- ```json
- {
-   "root": "./docs/.vuepress/dist"
- }
- ```
+   `static.json`:
+   ```json
+   {
+     "root": "./docs/.vuepress/dist"
+   }
+   ```
 
-This is the configuration of your site. see more at [heroku-buildpack-static](https://github.com/heroku/heroku-buildpack-static).
+This is the configuration of your site. See more at [heroku-buildpack-static](https://github.com/heroku/heroku-buildpack-static).
 
 5. Set up your Heroku git remote:
 
@@ -181,31 +213,6 @@ git push heroku master
 heroku open
 ```
 
-## Now
+## ZEIT Now
 
-1. Install the Now CLI globally: `npm install -g now`
-
-2. Add a `now.json` file to your project root:
-
-    ```json
-    {
-        "version": 2,
-        "name": "vuepress",
-        "alias": "vuepress.now.sh",
-        "builds": [{
-          "src": "package.json",
-          "use": "@now/static-build"
-        }]
-     }
-    ```
-
-    You can further customize the static serving behavior by consulting [Now's documentation](https://zeit.co/examples/vuepress/).
-
-3. Adding a deployment script in `package.json`:
-
-    ```json
-    "now-build": "npm run docs:build && mv docs/.vuepress/dist dist"
-    "docs:deploy": "now && now alias"
-    ```
-
-    This will automatically point your site's alias to the latest deployment. Now, just run `npm run docs:deploy` to deploy your app.
+Please check out [Deploy an example VuePress site with ZEIT Now](https://github.com/zeit/now/tree/master/examples/vuepress).

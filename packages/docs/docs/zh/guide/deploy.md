@@ -56,14 +56,44 @@ cd -
 你可以在你的持续集成的设置中，设置在每次 push 代码时自动运行上述脚本。
 :::
 
-## GitLab Pages and GitLab CI
+### GitHub Pages and Travis CI
+
+1. 在 `docs/.vuepress/config.js` 中设置正确的 `base`。
+
+   如果你打算发布到 `https://<USERNAME or GROUP>.github.io/`，则可以省略这一步，因为 `base` 默认即是 `"/"`。
+
+   如果你打算发布到 `https://<USERNAME or GROUP>.github.io/<REPO>/`（也就是说你的仓库在 `https://github.com/<USERNAME>/<REPO>`），则将 `base` 设置为 `"/<REPO>/"`。
+
+2. 在项目的根目录创建一个名为 `.travis.yml` 的文件；
+3. 在本地执行 `yarn` 或 `npm install` 并且提交生成的 lock 文件（即 `yarn.lock` 或 `package-lock.json`）；
+4. 使用 GitHub Pages 部署提供程序模板并遵循 [Travis 文档](https://docs.travis-ci.com/user/deployment/pages/)。
+
+``` yaml
+language: node_js
+node_js:
+  - lts/*
+install:
+  - yarn install # npm ci
+script:
+  - yarn docs:build # npm run docs:build
+deploy:
+  provider: pages
+  skip_cleanup: true
+  local_dir: docs/.vuepress/dist
+  github_token: $GITHUB_TOKEN # 在 GitHub 中生成，用于允许 Travis 向你的仓库推送代码。在 Travis 的项目设置页面进行配置，设置为 secure variable
+  keep_history: true
+  on:
+    branch: master
+```
+
+### GitLab Pages and GitLab CI
 
 1. 在 `docs/.vuepress/config.js` 中设置正确的 `base`。
 
    如果你打算发布到 `https://<USERNAME or GROUP>.gitlab.io/`，则可以省略这一步，因为 `base` 默认即是 `"/"`。
-  
+
    如果你打算发布到 `https://<USERNAME or GROUP>.gitlab.io/<REPO>/`（也就是说你的仓库在 `https://gitlab.com/<USERNAME>/<REPO>`），则将 `base` 设置为 `"/<REPO>/"`。
-  
+
 2. 在 `.vuepress/config.js` 中将 `dest` 设置为 `public`。
 3. 在你项目的根目录下创建一个名为 `.gitlab-ci.yml` 的文件，无论何时你提交了更改，它都会帮助你自动构建和部署：
 
@@ -76,8 +106,8 @@ pages:
    - node_modules/
 
  script:
- - npm install
- - npm run docs:build
+ - yarn install # npm install
+ - yarn docs:build # npm run docs:build
  artifacts:
    paths:
    - public
@@ -87,10 +117,10 @@ pages:
 
 ## Netlify
 
-1. 在 Netlify 中, 创建一个新的 Github 项目，使用以下设置：
+1. 在 Netlify 中, 创建一个新的 GitHub 项目，使用以下设置：
 
-  - **Build Command:** `npm run build:docs` 或者 `yarn build:docs`
-  - **Publish directory:** `docs/.vuepress/dist`
+- **Build Command:** `yarn build:docs` 或者 `npm run build:docs`
+- **Publish directory:** `docs/.vuepress/dist`
 
 2. 点击 deploy 按钮！
 
@@ -140,9 +170,9 @@ pages:
 
 3. 运行 `heroku login` 并填写你的 Heroku 证书：
 
- ``` bash
- heroku login
- ```
+   ``` bash
+   heroku login
+   ```
 
 4. 在你的项目根目录中，创建一个名为 `static.json` 的文件，并包含下述内容：
 
@@ -154,7 +184,7 @@ pages:
 ```
 
 这里是你项目的配置，请参考 [heroku-buildpack-static](https://github.com/heroku/heroku-buildpack-static) 了解更多。
-    
+
 5. 配置 Heroku 的 git 远程仓库：
 
 ``` bash
@@ -169,9 +199,9 @@ heroku apps:create example
 # 为静态网站设置构建包
 heroku buildpacks:set https://github.com/heroku/heroku-buildpack-static.git
 ```
-  
+
 6. 部署你的网站：
-  
+
 ``` bash
 # 发布网站
 git push heroku master
@@ -179,3 +209,7 @@ git push heroku master
 # 打开浏览器查看 Helku CI 的 dashboard
 heroku open
 ```
+
+## ZEIT Now
+
+请查看 [用 ZEIT Now 部署一个 VuePress 的示例站点](https://github.com/zeit/now/tree/master/examples/vuepress).

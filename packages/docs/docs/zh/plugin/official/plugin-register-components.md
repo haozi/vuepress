@@ -5,7 +5,7 @@ metaTitle: 注册组件的插件 | VuePress
 
 # [@vuepress/plugin-register-components](https://github.com/vuejs/vuepress/tree/master/packages/%40vuepress/plugin-register-components)
 
-> register-components plugin for vuepress
+> register-components plugin for VuePress
 
 ## 安装
 
@@ -34,13 +34,13 @@ module.exports = {
 ``` js
 module.exports = {
   plugins: [
-    [ 
-      'register-components', 
+    [
+      'register-components',
       {
         componentsDir: somepath
       }
     ]
-  ] 
+  ]
 }
 ```
 
@@ -54,8 +54,8 @@ module.exports = {
 ``` js
 module.exports = {
   plugins: [
-    [ 
-      'register-components', 
+    [
+      'register-components',
       {
         components: [
           {
@@ -68,3 +68,10 @@ module.exports = {
   ]
 }
 ```
+
+### getComponentName
+
+- 类型: `(file: string) => string`
+- 默认值: `file => file.replace(/\/|\\/g, '-')`
+
+自定义 `componentsDir` 中注册的组件的名称。

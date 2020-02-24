@@ -5,7 +5,7 @@ metaTitle: Register Components Plugin | VuePress
 
 # [@vuepress/plugin-register-components](https://github.com/vuejs/vuepress/tree/master/packages/%40vuepress/plugin-register-components)
 
-> register-components plugin for vuepress
+> register-components plugin for VuePress
 
 ## Install
 
@@ -34,13 +34,13 @@ All components in this directory will be registered as global components, naming
 ``` js
 module.exports = {
   plugins: [
-    [ 
-      'register-components', 
+    [
+      'register-components',
       {
         componentsDir: somepath
       }
     ]
-  ] 
+  ]
 }
 ```
 
@@ -54,8 +54,8 @@ Register global components by explicit name and path.
 ``` js
 module.exports = {
   plugins: [
-    [ 
-      'register-components', 
+    [
+      'register-components',
       {
         components: [
           {
@@ -68,3 +68,10 @@ module.exports = {
   ]
 }
 ```
+
+### getComponentName
+
+- Type: `(file: string) => string`
+- Default: `file => file.replace(/\/|\\/g, '-')`
+
+Customize component names for files under `componentsDir`.

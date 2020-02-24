@@ -1,13 +1,19 @@
 ---
 title: blog
-metaTitle: Blog 插件 | VuePress
+metaTitle: 博客插件 | VuePress
 ---
 
-# [@vuepress/plugin-blog](https://github.com/vuejs/vuepress/tree/master/packages/@vuepress/plugin-blog)
+# [@vuepress/plugin-blog](https://github.com/vuepressjs/vuepress-plugin-blog)
 
-> 博客插件
+## 功能
+
+- [**分类**](https://vuepress-plugin-blog.ulivz.com/guide/getting-started.html#document-classifier)：强大的分类系统让你快速将贴文分类。
+- [**分页**](https://vuepress-plugin-blog.ulivz.com/guide/getting-started.html#pagination)： 极其简单的开箱即用的分页功能。
+- [**客户端 API**](https://vuepress-plugin-blog.ulivz.com/client-api/): 透过客户端 API 轻松地写一个博客主题。
 
 ## 安装
+
+在使用这个插件之前，我们强烈建议你先阅读 [Getting Started](https://vuepress-plugin-blog.ulivz.com/guide/getting-started.html)。
 
 ```bash
 yarn add -D @vuepress/plugin-blog
@@ -18,30 +24,8 @@ yarn add -D @vuepress/plugin-blog
 
 ```javascript
 module.exports = {
-  plugins: ['@vuepress/blog'] 
+  plugins: ['@vuepress/blog']
 }
 ```
 
-## 选项
-
-### postsDir
-
-- 类型: `string`
-- 默认值: `_posts`
-
-### categoryIndexPageUrl
-
-- 类型: `string`
-- 默认值: `/category/`
-
-### tagIndexPageUrl
-
-- 类型: `string`
-- 默认值: `/tag/`
-
-### permalink
-
-- 类型: `string`
-- 默认值: `/:year/:month/:day/:slug`
-
-为博客文章设置永久链接。详情参考 [Permalinks](/zh/guide/permalinks.html#模板变量)。
+参考 [文档](https://vuepress-theme-blog.ulivz.com/) 来查看所有可用的选项。

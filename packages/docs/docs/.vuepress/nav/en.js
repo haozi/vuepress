@@ -1,7 +1,7 @@
 module.exports = [
   {
     text: 'Guide',
-    link: '/guide/',
+    link: '/guide/'
   },
   {
     text: 'Config Reference',
@@ -17,22 +17,40 @@ module.exports = [
   },
   {
     text: 'Learn More',
+    ariaLabel: 'Learn More',
     items: [
+      {
+        text: 'API',
+        items: [
+          {
+            text: 'CLI',
+            link: '/api/cli.html'
+          },
+          {
+            text: 'Node',
+            link: '/api/node.html'
+          }
+        ]
+      },
       {
         text: 'Contributing Guide',
         items: [
+          {
+            text: 'Local Development',
+            link: '/miscellaneous/local-development.html'
+          },
           {
             text: 'Design Concepts',
             link: '/miscellaneous/design-concepts.html'
           },
           {
             text: 'FAQ',
-            link: '/faq/',
+            link: '/faq/'
           },
           {
             text: 'Glossary',
             link: '/miscellaneous/glossary.html'
-          },
+          }
         ]
       },
       {
@@ -49,5 +67,9 @@ module.exports = [
         ]
       }
     ]
+  },
+  {
+    text: '0.x',
+    link: 'https://v0.vuepress.vuejs.org/'
   }
 ]

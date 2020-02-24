@@ -1,6 +1,6 @@
 # 默认主题配置
 
-::: tip 提示
+::: tip
 本页所列的选项仅对默认主题生效。如果你在使用一个自定义主题，选项可能会有不同。
 :::
 
@@ -27,11 +27,26 @@ footer: MIT Licensed | Copyright © 2018-present Evan You
 ---
 ```
 
+你可以将相应的内容设置为 `null` 来禁用标题和副标题。
+
 任何 `YAML front matter` 之后额外的内容将会以普通的 markdown 被渲染，并插入到 `features` 的后面。
 
 ## 导航栏
 
 导航栏可能包含你的页面标题、[搜索框](#搜索框)、 [导航栏链接](#导航栏链接)、[多语言切换](../guide/i18n.md)、[仓库链接](#git-仓库和编辑链接)，它们均取决于你的配置。
+
+### 导航栏 Logo
+
+你可以通过 `themeConfig.logo` 增加导航栏 Logo ，Logo 可以被放置在[公共文件目录](../guide/assets.md#public-files)：
+
+``` js
+// .vuepress/config.js
+module.exports = {
+  themeConfig: {
+    logo: '/assets/img/logo.png',
+  }
+}
+```
 
 ### 导航栏链接
 
@@ -48,6 +63,21 @@ module.exports = {
     ]
   }
 }
+
+
+```
+外部链接 `<a>` 标签的特性将默认包含`target="_blank" rel="noopener noreferrer"`，你可以提供 `target` 与 `rel`，它们将被作为特性被增加到 `<a>` 标签上：
+
+``` js
+// .vuepress/config.js
+module.exports = {
+  themeConfig: {
+    nav: [
+      { text: 'External', link: 'https://google.com', target:'_self', rel:'' },
+      { text: 'Guide', link: '/guide/', target:'_blank' }
+    ]
+  }
+}
 ```
 
 当你提供了一个 `items` 数组而不是一个单一的 `link` 时，它将显示为一个 `下拉列表` ：
@@ -58,6 +88,7 @@ module.exports = {
     nav: [
       {
         text: 'Languages',
+        ariaLabel: 'Language Menu',
         items: [
           { text: 'Chinese', link: '/language/chinese/' },
           { text: 'Japanese', link: '/language/japanese/' }
@@ -138,7 +169,7 @@ sidebarDepth: 2
 ---
 ```
 
-### 显示所有页面的标题链接 <Badge text="0.11.0+"/>
+### 显示所有页面的标题链接
 
 默认情况下，侧边栏只会显示由当前活动页面的标题（headers）组成的链接，你可以将 `themeConfig.displayAllHeaders` 设置为 `true` 来显示所有页面的标题链接：
 
@@ -177,8 +208,10 @@ module.exports = {
   themeConfig: {
     sidebar: [
       {
-        title: 'Group 1',
-        collapsable: false,
+        title: 'Group 1',   // 必要的
+        path: '/foo/',      // 可选的, 应该是一个绝对路径
+        collapsable: false, // 可选的, 默认值是 true,
+        sidebarDepth: 1,    // 可选的, 默认值是 1
         children: [
           '/'
         ]
@@ -193,6 +226,12 @@ module.exports = {
 ```
 
 侧边栏的每个子组默认是可折叠的，你可以设置 `collapsable: false` 来让一个组永远都是展开状态。
+
+一个侧边栏的子组配置同时支持 [sidebarDepth](#nested-header-links) 字段用于重写默认显示的侧边栏深度(`1`)。
+
+::: tip
+  嵌套的侧边栏分组 <Badge text="beta"/> 也是支持的，但嵌套深度应小于 3，否则在控制台会收到警告。
+:::
 
 ### 多个侧边栏
 
@@ -306,6 +345,14 @@ module.exports = {
 }
 ```
 
+你可以通过 `YAML front matter` 来对单独的页面禁用内置的搜索框：
+
+```yaml
+---
+search: false
+---
+```
+
 ::: tip
 内置搜索只会为页面的标题、`h2` 和 `h3` 构建搜索索引，如果你需要全文搜索，你可以使用 [Algolia 搜索](#Algolia-搜索)。
 :::
@@ -346,43 +393,32 @@ module.exports = {
 请注意，`themeConfig.lastUpdated` 默认是关闭的，如果给定一个字符串，它将会作为前缀显示（默认值是：`Last Updated`）。
 
 ::: warning 使用须知
-  由于 `lastUpdated` 是基于 `git` 的, 所以你只能在一个基于 `git` 的项目中启用它。
+  由于 `lastUpdated` 是基于 `git` 的, 所以你只能在一个基于 `git` 的项目中启用它。此外，由于使用的时间戳来自 git commit，因此它将仅在给定页的第一次提交之后显示，并且仅在该页面后续提交更改时更新。
 :::
 
-## Service Worker
+**拓展阅读:**
 
-`themeConfig.serviceWorker` 允许你去配置 Service Worker。
+- [@vuepress/plugin-last-updated](../plugin/official/plugin-last-updated.md)
 
-::: tip 提示
-请不要将本选项与 [Config > serviceWorker](../config/README.md#serviceworker) 混淆，[Config > serviceWorker](../config/README.md#serviceworker) 是网站级别的配置，而本选项是主题级别的配置。
-:::
+## 上 / 下一篇链接
 
-### 刷新内容的弹窗 <Badge text="0.13.0+"/> <Badge text="beta" type="warn"/>
+上一篇和下一篇文章的链接将会自动地根据当前页面的侧边栏的顺序来获取。
 
-开启 `themeConfig.serviceWorker.updatePopup` 选项，将开启一个能够刷新内容的弹窗。当网站更新（即 Service Worker 更新）时，它会提供一个 `refresh` 按钮，允许用户立刻刷新内容。
-
-::: tip 提示
-如果没有 `refresh` 按钮，新的 service worker 将在所有的 [clients](https://developer.mozilla.org/en-US/docs/Web/API/Clients) 关闭后才会处于活动状态。这意味着访问者在关闭你网站的所有标签之前将无法看到新内容。但是，`refresh` 按钮可以立即激活新的 Service Worker。
-:::
+你可以通过 `themeConfig.nextLinks` 和 `themeConfig.prevLinks` 来全局禁用它们：
 
 ``` js
+// .vuepress/config.js
 module.exports = {
   themeConfig: {
-    serviceWorker: {
-      updatePopup: true // Boolean | Object, 默认值是 undefined.
-      // 如果设置为 true, 默认的文本配置将是: 
-      // updatePopup: { 
-      //    message: "New content is available.", 
-      //    buttonText: "Refresh" 
-      // }
-    }
+    // 默认值是 true 。设置为 false 来禁用所有页面的 下一篇 链接
+    nextLinks: false,
+    // 默认值是 true 。设置为 false 来禁用所有页面的 上一篇 链接
+    prevLinks: false
   }
 }
 ```
 
-## 上 / 下一篇链接
-
-上一篇和下一篇文章的链接将会自动地根据当前页面的侧边栏的顺序来获取。你也可以使用 `YAML front matter` 来明确地重写或者禁用它：
+你也可以使用 `YAML front matter` 来明确地重写或者禁用它们：
 
 ``` yaml
 ---
@@ -427,6 +463,19 @@ module.exports = {
 ---
 editLink: false
 ---
+```
+
+## 页面滚动 <Badge text="1.2.0+" />
+
+你可以通过 `themeConfig.smoothScroll` 选项来启用页面滚动效果。
+
+``` js
+// .vuepress/config.js
+module.exports = {
+  themeConfig: {
+    smoothScroll: true
+  }
+}
 ```
 
 ## 自定义页面类

@@ -12,22 +12,23 @@ GA 已经被分离为一个单独的插件 [@vuepress/plugin-google-analytics](.
 
 ::: upgrade
 
-1. Install `@vuepress/plugin-google-analytics`:
+1. 安装 `@vuepress/plugin-google-analytics`:
 
 ```bash
-yarn add -D @vuepress/plugin-google-analytics
+yarn add -D @vuepress/plugin-google-analytics@next
+# OR npm install -D @vuepress/plugin-google-analytics@next
 ```
 
-2. Update `vuepress/config.js`:
+2. 更新 `vuepress/config.js`:
 
 ```diff
 module.exports = {
 -  ga: 'UA-12345678-9'
-},
-plugins: {
-+  '@vuepress/google-analytics': {
-+    ga: 'UA-12345678-9'
-+  }
++  plugins: [
++    ['@vuepress/google-analytics', {
++      ga: 'UA-12345678-9'
++    }]
++ ]
 }
 ```
 :::
@@ -37,7 +38,7 @@ plugins: {
 使用 `extendMarkdown`：
 
 ::: upgrade
-Update `vuepress/config.js`:
+更新 `vuepress/config.js`:
 ```diff
 // vuepress/config.js
 module.exports = {

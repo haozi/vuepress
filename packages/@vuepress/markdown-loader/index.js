@@ -21,7 +21,8 @@ module.exports = function (src) {
   const isProd = process.env.NODE_ENV === 'production'
   const isServer = this.target === 'node'
   const options = getOptions(this)
-  const { sourceDir } = options
+  const loader = Object.create(this)
+  const { sourceDir, extractHeaders: extractHeadersPattern = ['h2', 'h3'] } = options
   let { markdown } = options
   if (!markdown) {
     markdown = md()
@@ -42,19 +43,19 @@ module.exports = function (src) {
 
   if (!isProd && !isServer) {
     const inferredTitle = inferTitle(frontmatter.data, frontmatter.content)
-    const headers = extractHeaders(content, ['h2', 'h3'], markdown)
+    const headers = extractHeaders(content, extractHeadersPattern, markdown)
     delete frontmatter.content
 
     // diff frontmatter and title, since they are not going to be part of the
     // returned component, changes in frontmatter do not trigger proper updates
     const cachedData = devCache.get(file)
     if (cachedData && (
-      cachedData.inferredTitle !== inferredTitle ||
-      JSON.stringify(cachedData.frontmatterData) !== JSON.stringify(frontmatter.data) ||
-      headersChanged(cachedData.headers, headers)
+      cachedData.inferredTitle !== inferredTitle
+      || JSON.stringify(cachedData.frontmatterData) !== JSON.stringify(frontmatter.data)
+      || headersChanged(cachedData.headers, headers)
     )) {
       // frontmatter changed... need to do a full reload
-      module.exports.frontmatterEmitter.emit('update')
+      module.exports.frontmatterEmitter.emit('update', file)
     }
 
     devCache.set(file, {
@@ -66,7 +67,15 @@ module.exports = function (src) {
 
   // the render method has been augmented to allow plugins to
   // register data during render
-  const { html, data: { hoistedTags, links }, dataBlockString } = markdown.render(content)
+  const {
+    html,
+    data: { hoistedTags, links },
+    dataBlockString
+  } = markdown.render(content, {
+    loader,
+    frontmatter: frontmatter.data,
+    relativePath: path.relative(sourceDir, file).replace(/\\/g, '/')
+  })
 
   // check if relative links are valid
   links && links.forEach(link => {
@@ -91,19 +100,19 @@ module.exports = function (src) {
     if (!fs.existsSync(file) && (!altfile || !fs.existsSync(altfile))) {
       this.emitWarning(
         new Error(
-          `\nFile for relative link "${link}" does not exist.\n` +
-          `(Resolved file: ${file})\n`
+          `\nFile for relative link "${link}" does not exist.\n`
+          + `(Resolved file: ${file})\n`
         )
       )
     }
   })
 
   const res = (
-    `<template>\n` +
-      `<ContentSlotsDistributor :slot-key="$parent.slotKey">${html}</ContentSlotsDistributor>\n` +
-    `</template>\n` +
-    (hoistedTags || []).join('\n') +
-    `\n${dataBlockString}\n`
+    `<template>\n`
+      + `<ContentSlotsDistributor :slot-key="$parent.slotKey">${html}</ContentSlotsDistributor>\n`
+    + `</template>\n`
+    + (hoistedTags || []).join('\n')
+    + `\n${dataBlockString}\n`
   )
   cache.set(key, res)
   return res
@@ -112,8 +121,8 @@ module.exports = function (src) {
 function headersChanged (a, b) {
   if (a.length !== b.length) return true
   return a.some((h, i) => (
-    h.title !== b[i].title ||
-    h.level !== b[i].level
+    h.title !== b[i].title
+    || h.level !== b[i].level
   ))
 }
 

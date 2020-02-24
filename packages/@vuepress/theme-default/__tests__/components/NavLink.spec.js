@@ -1,5 +1,5 @@
 import { mount, RouterLinkStub } from '@vue/test-utils'
-import createLocalVue from '@vuepress/test-utils/createLocalVue'
+import { createLocalVue } from '@vuepress/test-utils/client'
 import NavLink from '../../components/NavLink.vue'
 
 describe('NavLink', () => {
@@ -11,7 +11,7 @@ describe('NavLink', () => {
     const wrapper = mount(NavLink, {
       localVue: createLocalVue(),
       stubs: {
-        'router-link': RouterLinkStub
+        'RouterLink': RouterLinkStub
       },
       propsData: { item }
     })
